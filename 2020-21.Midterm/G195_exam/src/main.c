@@ -15,14 +15,39 @@ enum errors {
     FORK_ERROR, PIPE_ERROR, PIPE_W_ERROR, PIPE_R_ERROR
 };
 
+static const char *ERROR_MSGS[] = {
+    "Success",
+    "Word provided is not a word (contains non-alphanumerical characters)",
+    "File not found",
+    "File read access not granted",
+    "Error while reading from file",
+    "Error forking",
+    "Error setting up pipes. Call a plumber",
+    "Error writing to pipe.",
+    "Error reading from pipe."
+};
+
+
 typedef struct word_count {
     int count;
     int including_lines;
     int total_lines;
 } WordCount;
 
+int int_indexof(int *arr, int arrsz, int x);
 WordCount count_word(char *word, char *filepath, int* error);
 static int process_char(char c, char *word);
+pid_t *count_word_forkall(char *word, char **filenames, int filec, int fd[filec][2], int *error);
+pid_t count_word_fork(char *word, char *filename, int fd[2], int *error);
+
+
+int int_indexof(int *arr, int arrsz, int x)
+{
+    for (int i=0; i<arrsz; i++) {
+        if (arr[i]==x) return i;
+    }
+    return -1;
+}
 
 
 /** @brief Count the amount of times a word appears in a file, the number of lines,
@@ -131,11 +156,81 @@ int main(int argc, char **argv)
     }
 
     int error;
-    WordCount wc = count_word(argv[1], argv[2], &error);
-    printf("Found '%s' %d times, in %d out of %d lines.\n",
-        argv[1], wc.count, wc.including_lines, wc.total_lines
-    );
 
+    int fds[argc-2][2];
+    pid_t pids[argc-2]; // = count_word_forkall(argv[1], &(argv[2]), argc-2, fds, &error);
+
+    pids[0] = count_word_fork(argv[1], argv[2], fds[0], &error);
+    int i =0 ;
+    int status;
+    int pid = wait(&status);
+    printf("Process %d finished with status %d (%s)\n",
+        pid, status, status? "error":"success"
+    );
+    if (status) {
+        int errorn = 0;
+        close(fds[i][PIPE_W]);
+        read(fds[i][PIPE_R], &errorn, sizeof(int));
+        close(fds[i][PIPE_R]);
+
+        printf("  Error: %s", ERROR_MSGS[errorn]);
+    }
+    else {
+        WordCount wc;
+        close(fds[i][PIPE_W]);
+        read(fds[i][PIPE_R], &wc, sizeof(WordCount));
+        close(fds[i][PIPE_R]);
+
+        // printf("Word '%s' in file '%s'.\n");
+        printf("  Found %d times in %d out of %d lines\n",
+            wc.count, wc.including_lines, wc.total_lines
+        );
+    }
+    for (int i=0; i<argc-2; i++) {
+    }
 
     exit(EXIT_SUCCESS);
 }
+
+
+pid_t *count_word_forkall(char *word, char **filenames, int filec, int fds[filec][2], int *error)
+{
+    pid_t *pids = calloc(filec, sizeof(pid_t));
+
+    for (int i=0; i<filec; i++) {
+        
+    }
+    
+    return pids;
+}
+
+
+pid_t count_word_fork(char *word, char *filename, int fd[2], int *error)
+{
+    if (pipe(fd) == -1) {
+        *error = PIPE_ERROR;
+        return -2;
+    }
+
+    pid_t pid;
+    if ((pid = fork()) == -1) {
+        *error = FORK_ERROR;
+        return -1;
+    }
+    else if(pid==0) {
+        WordCount wc = count_word(word, filename, error);
+        close(fd[PIPE_R]);
+        if (*error) {
+            write(fd[PIPE_W], error, sizeof(int));
+            _exit(EXIT_FAILURE);
+        }
+        int written = write(fd[PIPE_W], &wc, sizeof(WordCount));
+        close(fd[PIPE_W]);
+        if (written == -1) {
+            _exit(EXIT_FAILURE);
+        }
+        _exit(EXIT_SUCCESS);
+    }
+    return pid;
+}
+
