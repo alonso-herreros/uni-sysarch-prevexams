@@ -2,6 +2,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 
 #define BUFFER_SZ 1024
@@ -117,17 +118,19 @@ static int process_char(char c, char *word)
     static int found = 0;
     
     int out = 0;
+    c = tolower(c);
 
     if (c<'0' || (c>'9'&&c<'A') || (c>'Z'&&c<'a') || c>'z') { // Not alphanumerical
         if (found) { // The last character was the end of the target word
             included_in_line = 1;
             out += 4; // Word found
         }
+        found = 0;
         progress = 0; // We may start scanning next char
     }
     else if (progress != -1) {
         found = 0; // Reset this
-        if (c == word[progress]) { // On the right track
+        if (c == tolower(word[progress])) { // On the right track
             progress++; 
             if (word[progress] == '\0')  found = 1; // We'll check if next char is \s
         }
@@ -158,36 +161,44 @@ int main(int argc, char **argv)
     int error;
 
     int fds[argc-2][2];
-    pid_t pids[argc-2]; // = count_word_forkall(argv[1], &(argv[2]), argc-2, fds, &error);
+    pid_t *pids = count_word_forkall(argv[1], &(argv[2]), argc-2, fds, &error);
+    // for (int i=0; i<argc-2; i++) {
+    //     printf("Forked %d\n", pids[i]);
+    // }
+    // printf("indexof(%d) in pids is %d\n", pids[0], int_indexof(pids, argc-2, pids[0]));
 
-    pids[0] = count_word_fork(argv[1], argv[2], fds[0], &error);
-    int i =0 ;
-    int status;
-    int pid = wait(&status);
-    printf("Process %d finished with status %d (%s)\n",
-        pid, status, status? "error":"success"
-    );
-    if (status) {
-        int errorn = 0;
-        close(fds[i][PIPE_W]);
-        read(fds[i][PIPE_R], &errorn, sizeof(int));
-        close(fds[i][PIPE_R]);
-
-        printf("  Error: %s", ERROR_MSGS[errorn]);
-    }
-    else {
-        WordCount wc;
-        close(fds[i][PIPE_W]);
-        read(fds[i][PIPE_R], &wc, sizeof(WordCount));
-        close(fds[i][PIPE_R]);
-
-        // printf("Word '%s' in file '%s'.\n");
-        printf("  Found %d times in %d out of %d lines\n",
-            wc.count, wc.including_lines, wc.total_lines
-        );
-    }
     for (int i=0; i<argc-2; i++) {
+        int status;
+        int pid = wait(&status);
+        int index = int_indexof(pids, argc-2, pid);
+        printf("Process #%d (%d) finished with status %d (%s)\n",
+            index, pid, status, status? "error":"success"
+        );
+        if (status) {
+            if (index < 0) {
+                int errorn = 0;
+                close(fds[i][PIPE_W]);
+                read(fds[i][PIPE_R], &errorn, sizeof(int));
+                close(fds[i][PIPE_R]);
+
+                printf("  Error: %s", ERROR_MSGS[errorn]);
+            }
+            else  printf("  Process not indexed.");
+        }
+        else {
+            WordCount wc;
+            close(fds[i][PIPE_W]);
+            read(fds[i][PIPE_R], &wc, sizeof(WordCount));
+            close(fds[i][PIPE_R]);
+
+            printf("  Word '%s' in file #%d '%s':\n", argv[1], index, argv[index+2]);
+            printf("  Found %d times in %d out of %d lines\n",
+                wc.count, wc.including_lines, wc.total_lines
+            );
+        }
     }
+
+    free(pids);
 
     exit(EXIT_SUCCESS);
 }
@@ -198,9 +209,11 @@ pid_t *count_word_forkall(char *word, char **filenames, int filec, int fds[filec
     pid_t *pids = calloc(filec, sizeof(pid_t));
 
     for (int i=0; i<filec; i++) {
-        
+        int error_fork;
+        pids[i] = count_word_fork(word, filenames[i], fds[i], &error_fork);
+        *error = error_fork ? error_fork : *error;
     }
-    
+
     return pids;
 }
 
