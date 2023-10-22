@@ -69,6 +69,8 @@ WordCount count_word(char *word, char *filepath, int *error)
         if (c==EOF)  break;
     }
 
+    fclose(fp);
+
     return wc;
 }
 
