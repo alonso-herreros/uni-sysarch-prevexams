@@ -23,7 +23,7 @@ chmod o+rx ./bin/main
 | --- | :---: |
 | 2022-23 Midterm 1 (G95) | Done |
 | 2022-23 Midterm 1 (G195) | Done |
-| 2021-22 Midterm 1 | Not started |
+| 2021-22 Midterm 1 | Done |
 | 2020-21 Midterm 1 | Not started |
 
 ### Finals
