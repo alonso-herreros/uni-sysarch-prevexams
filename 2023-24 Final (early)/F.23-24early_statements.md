@@ -249,8 +249,7 @@ public class Q11Phi extends Thread {
     public static int counter;
     private int id;
     private Random rd;
-    public Q11Phi(Semaphore a, Semaphore b, Semaphore c, Semaphore d,
-Semaphore e, Semaphore f) {
+    public Q11Phi(Semaphore a, Semaphore b, Semaphore c, Semaphore d, Semaphore e, Semaphore f) {
         this.a = a;
         this.b = b;
         this.c = c;
@@ -601,8 +600,7 @@ public class University {
         mutexC = new Semaphore(__);
 
         for (int i = 0; i < __; i++) {
-            st = new _________(i, rASem, rBSem, rCSem, mutexA, mutexB,
-mutexC);
+            st = new _________(i, rASem, rBSem, rCSem, mutexA, mutexB, mutexC);
             st._________();
         }
     }
@@ -644,8 +642,7 @@ class Student extends Thread {
     private void roomCout() { // Section 2.3 }
 
     public void run() {
-        System.out.println("[ " + identifier + " ] In Leganes, waiting
-to enter");
+        System.out.println("[ " + identifier + " ] In Leganes, waiting to enter");
         ______________;
         try{Thread.sleep(rnd.nextInt(2000));} catch (Exception e) {}
         ______________;
@@ -723,8 +720,7 @@ class StudentMonitor extends Thread {
     }
 
     public void run() {
-        System.out.println("[ " + identifier + " ] In Leganes, waiting
-to enter");
+        System.out.println("[ " + identifier + " ] In Leganes, waiting to enter");
         HIDDEN
         try{Thread.sleep(rnd.nextInt(2000));} catch (Exception e) {}
         HIDDEN
