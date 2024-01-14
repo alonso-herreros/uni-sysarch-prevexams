@@ -1,7 +1,10 @@
+import java.util.*;
+import java.util.concurrent.*;
+
 class Student extends Thread {
     private int identifier;
     private Semaphore rASem, rBSem, rCSem;
-    private ______________ numInA, numInB, numInC;
+    private static int numInA, numInB, numInC;
 
     private Semaphore mutexA, mutexB, mutexC;
     private Random rnd = new Random();
@@ -17,22 +20,30 @@ class Student extends Thread {
         this.identifier = id;
     }
 
-    private void roomAin(int time){ //Section 2.3 }
-    private void roomBin() { // Section 2.3 }
-    private void roomCin() { // Section 2.3 }
-    private void roomCout() { // Section 2.3 }
+    private void roomAin(int time) {
+        //Section 2.3
+    }
+    private void roomBin() {
+        // Section 2.3
+    }
+    private void roomCin() {
+        // Section 2.3
+    }
+    private void roomCout() {
+        // Section 2.3
+    }
 
     public void run() {
         System.out.println("[ " + identifier + " ] In Leganes, waiting to enter");
-        ______________;
+        roomAin(1); // Cafeteria
         try{Thread.sleep(rnd.nextInt(2000));} catch (Exception e) {}
-        ______________;
-        try{Thread.sleep(rnd.nextInt(_____));} catch (Exception e) {}
-        ______________;
+        roomBin(); // Canteen
+        try{Thread.sleep(rnd.nextInt(5000));} catch (Exception e) {}
+        roomAin(2); // Cafeteria 2
         try{Thread.sleep(rnd.nextInt(1000));} catch (Exception e) {}
-        ______________;
-        try{Thread.sleep(rnd.nextInt(_____));} catch (Exception e) {}
-        ______________;
+        roomCin(); // Class
+        try{Thread.sleep(rnd.nextInt(3000));} catch (Exception e) {}
+        roomCout();
         System.out.println("[ " + identifier + " ] Outside");
     }
 }
