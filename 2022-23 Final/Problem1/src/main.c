@@ -9,6 +9,8 @@
 #define MUSIC_DATA_FILE "music_data.txt"
 #define LINE_SIZE 120
 #define MAXIMUM_TRACKS 20
+#define PIPE_R 0
+#define PIPE_W 1
 
 typedef struct song_info song;
 typedef struct disk_info disk, *disk_ptr;
@@ -39,6 +41,8 @@ category rap, rock, rumba;
 pid_t childpid, pid;
 int status;
 
+void parent(int pipefd[2]);
+void child(int pipefd[2], char *filename);
 
 static int initialize_data(char *filename);
 static void destroy_data();
@@ -49,7 +53,57 @@ int disk_indexoftitle(disk *disk, char *song_title);
 
 // Calculates the duration of all the songs in a category
 int calculate_duration(category *category_ptr){ /*...*/ }
-int main(int argc, char **argv){ /* SECTION 1.3 */}
+
+void child(int pipefd[2], char *filename)
+{
+    close(pipefd[PIPE_R]);
+
+    if(initialize_data(filename)<0) {
+        kill(getppid(), SIGINT);
+        close(pipefd[PIPE_W]);
+        exit(EXIT_FAILURE);
+    }
+
+    int durations[3];
+    durations[0] = calculate_duration(&rap);
+    durations[1] = calculate_duration(&rock);
+    durations[2] = calculate_duration(&rumba);
+
+    write(pipefd[PIPE_W], durations, 3*sizeof(int));
+    close(pipefd[PIPE_W]);
+
+    destroy_data();
+    exit(EXIT_SUCCESS);
+}
+
+void parent(int pipefd[2])
+{
+    signal(SIGTSTP, SIG_IGN);
+    close(pipefd[PIPE_W]);
+    
+    int durations[3];
+    read(pipefd[PIPE_R], durations, 3*sizeof(int));
+    
+    printf("Duration of rumba songs: %d\nDuration of rock songs: %d\nDuration of rap songs: %d",
+        durations[2], durations[1], durations[0]);
+
+    childpid = wait(&status);
+    if (status == EXIT_FAILURE)  exit(EXIT_FAILURE);
+    exit(EXIT_SUCCESS);
+}
+
+int main(int argc, char **argv)
+{
+    if (argc != 2)  exit(EXIT_FAILURE);
+    char *filename = argv[1];
+
+    int pipefd[2];
+    if (pipe(pipefd) < 0)  exit(EXIT_FAILURE);
+
+    if ((childpid = fork()) < 0)  exit(EXIT_FAILURE);
+    else if (childpid == 0)  child(pipefd, filename);
+
+}
 
 disk *cat_getdisk(category *cat, char *disk_title)
 {
