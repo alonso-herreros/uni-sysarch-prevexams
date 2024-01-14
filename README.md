@@ -29,7 +29,7 @@ chmod o+rx ./bin/main
 ### Finals
 | Sample || Status |
 | --- | --- | :---: |
-| 2022-23 | Ordinary      | Not loaded |
+| 2022-23 | Ordinary      | Not started |
 |         | Extraordinary | Not loaded |
 | 2021-22 | Ordinary      | Not loaded |
 |         | Extraordinary | Not loaded |
