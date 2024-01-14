@@ -21,16 +21,74 @@ class Student extends Thread {
     }
 
     private void roomAin(int time) {
-        //Section 2.3
+        String room = "A" + time + " Cafeteria";
+        String activity = time==1? "Ordering food" : "Exiting the Cafeteria";
+
+        if (time == 1)
+            try { rASem.acquire(); } catch (InterruptedException e) {}
+        else {
+            try { mutexB.acquire(); } catch (InterruptedException e) {}
+            rBSem.release();
+            numInB--;
+            mutexB.release();
+        }
+
+        try { mutexA.acquire(); } catch (InterruptedException e) {}
+
+        numInA++;
+        System.out.printf("[ %2d ] %-17s (total %2d students)     ...%s...\n",
+                identifier, room, numInA, activity);
+
+        mutexA.release();
     }
+
     private void roomBin() {
-        // Section 2.3
+        String room = "B Canteen";
+        String activity = "Eating";
+
+        try { rBSem.acquire(); } catch (InterruptedException e) {}
+
+        try {
+            mutexA.acquire();
+            mutexB.acquire();
+        } catch (InterruptedException e) {}
+
+        numInA--;
+        numInB++;
+        System.out.printf("[ %2d ] %-17s (total %2d students)     ...%s...\n",
+                identifier, room, numInB, activity);
+
+        mutexB.release();
+        mutexA.release();
     }
+
     private void roomCin() {
-        // Section 2.3
+        String room = "C class";
+        String activity = "In class";
+
+        try { rCSem.acquire(); } catch (InterruptedException e) {}
+
+        try {
+            mutexA.acquire();
+            mutexC.acquire();
+        } catch (InterruptedException e) {}
+
+        rASem.release();
+        numInA--;
+        numInC++;
+
+        System.out.printf("[ %2d ] %-17s (total %2d students)     ...%s...\n",
+                identifier, room, numInC, activity);
+
+        mutexC.release();
+        mutexA.release();
     }
+
     private void roomCout() {
-        // Section 2.3
+        try { mutexC.acquire(); } catch (InterruptedException e) {}
+        rCSem.release();
+        numInC--;
+        mutexC.release();
     }
 
     public void run() {
