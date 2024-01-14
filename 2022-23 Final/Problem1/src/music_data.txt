@@ -1,0 +1,5 @@
+rumba,disk1,song1,120
+rumba,disk1,song2,135
+rumba,disk2,song1,90
+rock,disk1,song1,56
+rap,disk1,song1,96

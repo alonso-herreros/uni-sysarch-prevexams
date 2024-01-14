@@ -53,17 +53,32 @@ int disk_indexoftitle(disk *disk, char *song_title);
 
 
 // Calculates the duration of all the songs in a category
-int calculate_duration(category *category_ptr){ /*...*/ }
+int calculate_duration(category *category_ptr)
+{
+    if (category_ptr == NULL || category_ptr->num_of_disks == 0) return 0;
+
+    int sum = 0;
+    for (disk *c_disk = category_ptr->first; c_disk != NULL; c_disk = c_disk->next) {
+        int i;
+        for (song c_song = c_disk->songs[i=0]; i<c_disk->num_tracks; c_song = c_disk->songs[++i]) {
+            sum += c_song.duration;
+        }
+    }
+    return sum;
+}
 
 void child(int pipefd[2], char *filename)
 {
     close(pipefd[PIPE_R]);
+    // printf("[DBG][C] started\n");
 
     if(initialize_data(filename)<0) {
+        // printf("[DBG][C] Init Data ERROR\n");
         kill(getppid(), SIGINT);
         close(pipefd[PIPE_W]);
         exit(EXIT_FAILURE);
     }
+    // printf("[DBG][C] Init Data OK\n");
 
     int durations[3];
     durations[0] = calculate_duration(&rap);
@@ -73,7 +88,9 @@ void child(int pipefd[2], char *filename)
     write(pipefd[PIPE_W], durations, 3*sizeof(int));
     close(pipefd[PIPE_W]);
 
+    // printf("[DBG][C] Destroying data\n");
     destroy_data();
+    // printf("[DBG][C] Ending\n");
     exit(EXIT_SUCCESS);
 }
 
@@ -81,14 +98,18 @@ void parent(int pipefd[2])
 {
     signal(SIGTSTP, SIG_IGN);
     close(pipefd[PIPE_W]);
+
+    // printf("[DBG][P] Started\n");
     
     int durations[3];
     read(pipefd[PIPE_R], durations, 3*sizeof(int));
     
-    printf("Duration of rumba songs: %d\nDuration of rock songs: %d\nDuration of rap songs: %d",
+    printf("Duration of rumba songs: %d\nDuration of rock songs: %d\nDuration of rap songs: %d\n",
         durations[2], durations[1], durations[0]);
 
+    // printf("[DBG][P] Ending\n");
     childpid = wait(&status);
+    // printf("[DBG][P] Child ended with %d\n", status);
     if (status == EXIT_FAILURE)  exit(EXIT_FAILURE);
     exit(EXIT_SUCCESS);
 }
@@ -98,13 +119,15 @@ int main(int argc, char **argv)
 {
     if (argc != 2)  exit(EXIT_FAILURE);
     char *filename = argv[1];
+    // printf("[DBG] Args OK\n");
 
     int pipefd[2];
     if (pipe(pipefd) < 0)  exit(EXIT_FAILURE);
+    // printf("[DBG] Pipe OK\n");
 
     if ((childpid = fork()) < 0)  exit(EXIT_FAILURE);
     else if (childpid == 0)  child(pipefd, filename);
-
+    parent(pipefd);
 }
 #endif
 
@@ -212,9 +235,13 @@ static int initialize_data(char *filename) {
     int duration;
     enum categories music_category;
 
+    // printf("[DBG][C] Trying to open '%s'\n", filename);
+
     fd = fopen(filename, "r");
 
     if(fd==NULL){ return -1;}
+
+    // printf("[DBG][C] File open OK\n");
 
     // Read lines and initialize data
     while((readc=getline(&buffer, &n, fd)!=-1)){
