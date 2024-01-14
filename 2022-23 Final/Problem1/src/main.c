@@ -107,46 +107,46 @@ static int initialize_data(char *filename) {
     int duration;
     enum categories music_category;
 
-    fd = __________(1)__________;
+    fd = fopen(filename, "r");
 
     if(fd==NULL){ return -1;}
 
     // Read lines and initialize data
-    while((readc=________(2)______________!=-1)){
+    while((readc=getline(&buffer, &n, fd)!=-1)){
         buffer[strcspn(buffer, "\r\n")] = 0;
         // Get individual values with strtok
         rest = buffer;
 
         // Get category
-        token = strtok_r(rest, __(3)__, &rest);
+        token = strtok_r(rest, ",", &rest);
 
-        if(___(4)____(__(5)__,"rap") == 0) ___(6)__ = RAP;
-        else if(HIDDEN(HIDDEN,"rock") == 0) HIDDEN = ROCK;
-        else if(HIDDEN(HIDDEN,"rumba") == 0) HIDDEN = RUMBA;
+        if(strcmp(token,"rap") == 0) music_category = RAP;
+        else if(strcmp(token,"rock") == 0) music_category = ROCK;
+        else if(strcmp(token,"rumba") == 0) music_category = RUMBA;
 
         // Get disk
         token = strtok_r(rest, ",", &rest);
-        char *disk_title = ____(7)___; // 1-argument function to copy the String
+        char *disk_title = strdup(token); // 1-argument function to copy the String
 
         // Get song title
         token = strtok_r(rest, ",", &rest);
-        char *title = HIDDEN;
+        char *title = strdup(token);
 
         // Get duration
         token = strtok_r(rest, ",", &rest);
-        duration = ___(8)___(token);
+        duration = atoi(token);
 
         // Append to data structures
         song new_song;
         new_song.duration = duration;
         new_song.title = title;
-        if(music_category==RAP){_________(9)__________; }
-        if(music_category == ROCK) { HIDDEN; }
-        if(music_category == RUMBA) { HIDDEN; }
+        if(music_category==RAP){ add_item(new_song, &rap, disk_title); }
+        if(music_category == ROCK) { add_item(new_song, &rock, disk_title); }
+        if(music_category == RUMBA) { add_item(new_song, &rumba, disk_title); }
     }
-    ______(10)_________;
+    free(buffer);
 
-    if(______(11)_______!=0){
+    if(fclose(fd)!=0){
         perror("Error when closing file");
         return -1;
     }
