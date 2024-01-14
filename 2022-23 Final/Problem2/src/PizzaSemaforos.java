@@ -10,12 +10,10 @@ class Oven extends Thread {
     public void run() {
         int numPizzas = f.nTables * 5;
         int pizzas = numPizzas / 6;
-        for (int i = 0; i < _____(1)______; i++) {
-            f.preparePizzas(____(2)_______);
+        for (int i = 0; i < ___________/*(1)*/; i++) {
+            f.preparePizzas(___________/*(2)*/);
             try { Thread.sleep(200); } catch (Exception e) {
             }
-
-
         }
     }
 }
@@ -28,7 +26,7 @@ class Cashier extends Thread {
     }
 
     public void run() {
-        for (int i = 0; i < _____(3)_______; i++) {
+        for (int i = 0; i < ____________/*(3)*/; i++) {
             f.chargeBill();
             try { Thread.sleep(75); } catch (Exception e) {}
         }
@@ -43,7 +41,7 @@ class Waiter extends Thread {
     }
 
     public void run() {
-        for (int i = 0; i < _____(4)_____; i++) {
+        for (int i = 0; i < __________/*(4)*/; i++) {
             f.servePizzas();
             try { Thread.sleep(100); } catch (Exception e) {}
         }
@@ -59,10 +57,10 @@ class PizzaSem {
         this.nTables = nTables;
     }
 
-    private Semaphore semA = new Semaphore(__(5)___);
-    private Semaphore semB = new Semaphore(__(6)___);
-    private Semaphore semC = new Semaphore(__(7)___);
-    private Semaphore semD = new Semaphore(__(8)___);
+    private Semaphore semA = new Semaphore(_____/*(5)*/);
+    private Semaphore semB = new Semaphore(_____/*(6)*/);
+    private Semaphore semC = new Semaphore(_____/*(7)*/);
+    private Semaphore semD = new Semaphore(_____/*(8)*/);
 
     private int nPizzas = 0;
     private int nServedCustomers = 0;
@@ -75,50 +73,48 @@ class PizzaSem {
 
     public void preparePizzas(int id) {
         try {semA.acquire(); } catch (Exception e) {}
-        while (___(9)____ >= MAX_NUM_PIZZAS) {
-            try { ______(10)______; } catch (Exception e) {}
-
-
-            try { ______(11)______; } catch (Exception e) {}
-            try { ______(12)______; } catch (Exception e) {}
+        while (_______/*(9)*/ >= MAX_NUM_PIZZAS) {
+            try { ____________/*(10)*/; } catch (Exception e) {}
+            try { ____________/*(11)*/; } catch (Exception e) {}
+            try { ____________/*(12)*/; } catch (Exception e) {}
         }
 
         nPizzas = nPizzas + 2;
         if ((nPizzas) / NUM_CLIENTS - (nPizzas - 2) / NUM_CLIENTS > 0)
-            ________(13)_________++;
+            _________________/*(13)*/++;
 
         System.out.println("Oven " + id + ": " + toString());
         semC.release();
-        _______(14)________;
+        _______________/*(14)*/;
         semA.release();
     }
 
     public void chargeBill() {
         try { semA.acquire(); } catch (Exception e) {}
-        while (_____(15)______ < 1) {
-            try { ______(16)_______; } catch (Exception e) {}
+        while (___________/*(15)*/ < 1) {
+            try { _____________/*(16)*/; } catch (Exception e) {}
             try { semD.acquire(); } catch (Exception e) {}
-            try { ______(17)_______; } catch (Exception e) {}
+            try { _____________/*(17)*/; } catch (Exception e) {}
         }
 
         nChargedTables = nChargedTables + 1;
-        ______(18)________--;
+        ______________/*(18)*/--;
         System.out.println("Cashier: " + toString() + " total cashed tables " + nChargedTables);
-        _______(19)________;
+        _______________/*(19)*/;
         semA.release();
     }
 
     public void servePizzas() {
         try { semA.acquire(); } catch (Exception e) {}
-        while ((____(20)_____ < NUM_CLIENTS)) {
-            try { ____(21)________; } catch (Exception e) {}
-            try { _____(22)________; } catch (Exception e) {}
-            try { ______(23)_______; } catch (Exception e) {}
+        while ((_________/*(20)*/ < NUM_CLIENTS)) {
+            try { ____________/*(21)*/; } catch (Exception e) {}
+            try { _____________/*(22)*/; } catch (Exception e) {}
+            try { _____________/*(23)*/; } catch (Exception e) {}
         }
-        ____(24)_______ -= _____(25)_______;
-        ______(26)_____ += ______(27)______;
+        ___________/*(24)*/ -= ____________/*(25)*/;
+        ___________/*(26)*/ += ____________/*(27)*/;
         System.out.println("Waiter: " + toString() + " total served customers " + nServedCustomers);
-        _______(28)_________;
+        ________________/*(28)*/;
         semA.release();
     }
 }
