@@ -97,7 +97,61 @@ void add_item(song new_song, category *category_ptr, char *disk_title) {
     disk_add(disk_found, new_song);
 }
 
-static int initialize_data(char *filename) { /* SECTION 1.2 */ }
+static int initialize_data(char *filename) {
+    FILE *fd;
+    char *buffer = NULL;
+    ssize_t readc=0;
+    size_t n=0;
+    char* token;
+    char* rest;
+    int duration;
+    enum categories music_category;
+
+    fd = __________(1)__________;
+
+    if(fd==NULL){ return -1;}
+
+    // Read lines and initialize data
+    while((readc=________(2)______________!=-1)){
+        buffer[strcspn(buffer, "\r\n")] = 0;
+        // Get individual values with strtok
+        rest = buffer;
+
+        // Get category
+        token = strtok_r(rest, __(3)__, &rest);
+
+        if(___(4)____(__(5)__,"rap") == 0) ___(6)__ = RAP;
+        else if(HIDDEN(HIDDEN,"rock") == 0) HIDDEN = ROCK;
+        else if(HIDDEN(HIDDEN,"rumba") == 0) HIDDEN = RUMBA;
+
+        // Get disk
+        token = strtok_r(rest, ",", &rest);
+        char *disk_title = ____(7)___; // 1-argument function to copy the String
+
+        // Get song title
+        token = strtok_r(rest, ",", &rest);
+        char *title = HIDDEN;
+
+        // Get duration
+        token = strtok_r(rest, ",", &rest);
+        duration = ___(8)___(token);
+
+        // Append to data structures
+        song new_song;
+        new_song.duration = duration;
+        new_song.title = title;
+        if(music_category==RAP){_________(9)__________; }
+        if(music_category == ROCK) { HIDDEN; }
+        if(music_category == RUMBA) { HIDDEN; }
+    }
+    ______(10)_________;
+
+    if(______(11)_______!=0){
+        perror("Error when closing file");
+        return -1;
+    }
+    return 0;
+}
 
 // Destroy the data created
 static void destroy_data() { /*...*/ }
