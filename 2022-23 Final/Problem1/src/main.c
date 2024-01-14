@@ -46,6 +46,7 @@ void child(int pipefd[2], char *filename);
 
 static int initialize_data(char *filename);
 static void destroy_data();
+int cat_add(category *cat, disk* disk);
 disk *cat_getdisk(category *cat_ptr, char *disk_title);
 int disk_add(disk *disk, song new_song);
 int disk_indexoftitle(disk *disk, char *song_title);
@@ -92,6 +93,7 @@ void parent(int pipefd[2])
     exit(EXIT_SUCCESS);
 }
 
+#ifndef TEST
 int main(int argc, char **argv)
 {
     if (argc != 2)  exit(EXIT_FAILURE);
@@ -103,6 +105,47 @@ int main(int argc, char **argv)
     if ((childpid = fork()) < 0)  exit(EXIT_FAILURE);
     else if (childpid == 0)  child(pipefd, filename);
 
+}
+#endif
+
+int cat_add(category *cat, disk *new_disk) {
+    if (cat == NULL || new_disk == NULL)  return -1;
+
+    if (cat->num_of_disks == 0) {
+        // printf("[DBG] Category empty. Adding as first disk.\n");
+        cat->first = new_disk;
+        cat->num_of_disks = 1;
+        return 1;
+    }
+    
+    // printf("[DBG] Category not empty (%d disks).\n", cat->num_of_disks);
+
+    disk *disk_found = cat_getdisk(cat, new_disk->disk_title);
+    if (disk_found == new_disk) {
+        // printf("[DBG] Disk is already in category\n");
+        return 1;
+    }
+    
+    if (disk_found == NULL) {
+        // printf("[DBG] Disk not found. Appending.\n");
+        disk *curr;
+        for (curr = cat->first; curr->next != NULL; curr = curr->next);
+        curr->next = new_disk;
+        cat->num_of_disks++;
+        return 1;
+    }
+
+    // printf("[DBG] Equivalent disk found at %p. Searching for pointer to it.\n", disk_found);
+    for (disk **curr = &(cat->first); (*curr) != NULL; curr = &((*curr)->next)){
+        // printf("[DBG] Checking: %p\n", (*curr));
+        if ((*curr) == disk_found) {
+            // printf("[DBG] Redirecting pointer towards %p\n", new_disk);
+            *curr = new_disk;
+            free(disk_found);
+        }
+    }
+
+    return 1;
 }
 
 disk *cat_getdisk(category *cat, char *disk_title)
@@ -125,9 +168,11 @@ int disk_add(disk *disk, song new_song)
 {
     int found_index = disk_indexoftitle(disk, new_song.title);
     if (found_index == -1) {
+        // printf("[DBG] Song '%s' not found. Will append.\n", new_song.title);
         if (disk->num_tracks >= MAXIMUM_TRACKS)  return 0;
-        found_index = ++disk->num_tracks;
+        found_index = disk->num_tracks++;
     }
+    // printf("[DBG] Adding song at position %d\n", found_index);
     disk->songs[found_index] = new_song;
     return 1;
 }
@@ -146,9 +191,15 @@ int disk_indexoftitle(disk *disk, char *song_title)
 void add_item(song new_song, category *category_ptr, char *disk_title) {
     disk *disk_found = cat_getdisk(category_ptr, disk_title);
     if (disk_found == NULL) {
+        // printf("[DBG] Disk '%s' not found. Creating new disk\n", disk_title);
         disk_found = disk_new(disk_title);
     }
+    // printf("[DBG] Adding song '%s' to disk '%s'\n", new_song.title, disk_found->disk_title);
     disk_add(disk_found, new_song);
+    // printf("[DBG] Disk has %d songs after addition\n", disk_found->num_tracks);
+    // printf("[DBG] Adding disk '%s' to category\n", disk_found->disk_title);
+    cat_add(category_ptr, disk_found);
+    // printf("[DBG] Category has %d disks after addition\n", category_ptr->num_of_disks);
 }
 
 static int initialize_data(char *filename) {
