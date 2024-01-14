@@ -2,7 +2,7 @@
 
 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14 | 15 | 16 | 17 | 18 | 19 | 20 |
 |---|---|---|---|---|---|---|---|---|----|----|----|----|----|----|----|----|----|----|----|
-| c | c | a | b |   | b | d | b | c | d  |    | a  | a  | a  | a  | a  | a  | b  | a  | a  |
+| c | a | a | b | b | b | d | b | c | d  | a  | a  | a  | a  | a  | a  | a  | a  | a  | a  |
 
 ## Question 1
 
@@ -13,9 +13,9 @@
 
 ## Question 2
 
-* [ ] a) `printf("%d", *(*ptr_2+i));`
+* [X] a) `printf("%d", *(*ptr_2+i));`
 * [ ] b) `printf("%d", **ptr_2[i]);`
-* [X] c) `printf("%d", *ptr_1[i]);`
+* [ ] c) `printf("%d", *ptr_1[i]);`
 * [ ] d) `printf("%d", **ptr_2->i);`
 
 ## Question 3
@@ -37,7 +37,7 @@
 ## Question 5
 
 * [ ] a) Only A is printed
-* [ ] b) Only B is printed
+* [X] b) Only B is printed
 * [ ] c) AB is printed
 * [ ] d) Neither A nor B is printed because an error occurs before the while is reached.
 
@@ -81,7 +81,7 @@ continues to display the text “question 9”.
 
 ## Question 11
 
-* [ ] a) Memory space
+* [X] a) Memory space
 * [ ] b) Id
 * [ ] c) Stack
 * [ ] d) Registers
@@ -130,8 +130,8 @@ continues to display the text “question 9”.
 
 ## Question 18
 
-* [ ] a) Signal-and-continue
-* [X] b) Signal-and-wait
+* [X] a) Signal-and-continue
+* [ ] b) Signal-and-wait
 * [ ] c) Signal-and-exit
 * [ ] d) Signal-and-release
 
