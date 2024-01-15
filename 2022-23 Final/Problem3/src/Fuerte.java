@@ -28,7 +28,7 @@ class Fuerte extends Agente
                 case PROTON:
                     espacio.Get_quarks(2,1);
                     break;
-                case default:
+                default:
                     espacio.Get_quarks(1,2);
                     break;
                 }
