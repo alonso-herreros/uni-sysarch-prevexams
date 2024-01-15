@@ -1,9 +1,12 @@
+package materia;
+
 class Vacio extends Agente
     {
     Espacio espacio;
     
     public Vacio(Espacio espacio)
         {
+        super();
         this.espacio = espacio;
         }
     

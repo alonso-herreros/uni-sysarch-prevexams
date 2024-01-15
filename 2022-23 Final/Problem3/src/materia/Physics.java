@@ -1,6 +1,10 @@
+package materia;
 import java.util.ArrayList;
 
+
 public class Physics {
+    static final int NV=1, NF=1, ND=1;
+
     public static void main (String[] args)
         {
         Thread hilo;

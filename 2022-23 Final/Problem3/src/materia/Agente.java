@@ -1,3 +1,4 @@
+package materia;
 abstract class Agente extends Thread
     {
     public void Join()

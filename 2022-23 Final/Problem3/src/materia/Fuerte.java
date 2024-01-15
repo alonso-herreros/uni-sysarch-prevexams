@@ -1,3 +1,5 @@
+package materia;
+
 class Fuerte extends Agente
     {
     Espacio espacio;

@@ -1,3 +1,5 @@
+package materia;
+
 class Debil extends Agente
     {
     Espacio espacio;
