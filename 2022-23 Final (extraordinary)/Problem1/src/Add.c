@@ -93,6 +93,16 @@ void Display(Node *p_first)
     puts("-------------------------");
     }
 
+void Destroy (Node *p_first)
+{
+    Node *curr, *next;
+    for (curr = p_first; curr != NULL; curr = next) {
+        next = curr->next;
+        free(curr);
+    }
+}
+
+
 Node *Read(const char *file_name)
 {
     FILE *f = fopen(file_name, "rb");
