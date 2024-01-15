@@ -36,7 +36,7 @@ void Display (Node *p_first);
 // Destroy debe liberar la memoria ocupada por la lista.
 void Destroy (Node *p_first);
 
-
+void Parent_process(pid_t cpid, const char *ip, const char *mac);
 void Child_process();
 
 void Parent_handler(int sig);
@@ -48,19 +48,14 @@ volatile int waiting_for_print;
 
 
 int main (int ac, char ** av)
-    {
-    Node *p_first = NULL;
-    Node *p_node;
+{
     Verify_args(ac, av);
 
-    p_first = Read(FILE_NAME);
-    Display(p_first);
-    p_node = New_node(av[1], av[2]);
-    p_first = Add(p_first, p_node);
-    Display(p_first);
-    Save(p_first, FILE_NAME);
-    Destroy(p_first);
-    }
+    pid_t cpid;
+    if((cpid=fork()) < 0)  exit(EXIT_FAILURE);
+    if (cpid == 0) Child_process();
+    Parent_process(cpid, av[0], av[1]);
+}
 
 void Verify_args(int ac, char ** av)
     {
@@ -147,6 +142,27 @@ void Save(Node *p_first, const char*file_name)
     fclose(f);
     }
 
+void Parent_process(pid_t cpid, const char *ip, const char *mac)
+{
+
+    sleep(1);
+
+    kill(cpid, SIGUSR1);
+    waiting_for_print = 1;
+    while (waiting_for_print)  pause();
+
+    Node *p_first = Read(FILE_NAME);
+    p_first = Add(p_first, New_node(ip, mac));
+    Save(p_first, FILE_NAME);
+    Destroy(p_first);
+
+    kill(cpid, SIGUSR1);
+    waiting_for_print = 1;
+    while (waiting_for_print)  pause();
+
+    kill(cpid, SIGINT);
+    exit(EXIT_SUCCESS);
+}
 
 void Child_process()
 {
