@@ -36,8 +36,12 @@ void Display (Node *p_first);
 // Destroy debe liberar la memoria ocupada por la lista.
 void Destroy (Node *p_first);
 
+void Parent_handler(int sig);
 
 void Child_handler(int sig);
+
+
+volatile int waiting_for_print;
 
 
 int main (int ac, char ** av)
@@ -140,6 +144,13 @@ void Save(Node *p_first, const char*file_name)
     fclose(f);
     }
 
+
+void Parent_handler(int sig)
+{
+    if (sig == SIGUSR1) {
+        waiting_for_print = 0;
+    }
+}
 
 void Child_handler(int sig)
 {
