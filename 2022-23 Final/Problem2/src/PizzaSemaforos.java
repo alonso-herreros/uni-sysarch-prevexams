@@ -1,3 +1,5 @@
+import java.util.concurrent.Semaphore;
+
 class Oven extends Thread {
     int ident;
     PizzaSem f;
@@ -10,8 +12,8 @@ class Oven extends Thread {
     public void run() {
         int numPizzas = f.nTables * 5;
         int pizzas = numPizzas / 6;
-        for (int i = 0; i < ___________/*(1)*/; i++) {
-            f.preparePizzas(___________/*(2)*/);
+        for (int i = 0; i < pizzas/*(1)*/; i++) {
+            f.preparePizzas(ident/*(2)*/);
             try { Thread.sleep(200); } catch (Exception e) {
             }
         }
@@ -26,7 +28,7 @@ class Cashier extends Thread {
     }
 
     public void run() {
-        for (int i = 0; i < ____________/*(3)*/; i++) {
+        for (int i = 0; i < f.nTables/*(3)*/; i++) {
             f.chargeBill();
             try { Thread.sleep(75); } catch (Exception e) {}
         }
@@ -41,7 +43,7 @@ class Waiter extends Thread {
     }
 
     public void run() {
-        for (int i = 0; i < __________/*(4)*/; i++) {
+        for (int i = 0; i < f.nTables/*(4)*/; i++) {
             f.servePizzas();
             try { Thread.sleep(100); } catch (Exception e) {}
         }
@@ -57,10 +59,10 @@ class PizzaSem {
         this.nTables = nTables;
     }
 
-    private Semaphore semA = new Semaphore(_____/*(5)*/);
-    private Semaphore semB = new Semaphore(_____/*(6)*/);
-    private Semaphore semC = new Semaphore(_____/*(7)*/);
-    private Semaphore semD = new Semaphore(_____/*(8)*/);
+    private Semaphore semA = new Semaphore(1/*(5)*/);
+    private Semaphore semB = new Semaphore(1/*(6)*/);
+    private Semaphore semC = new Semaphore(0/*(7)*/);
+    private Semaphore semD = new Semaphore(0/*(8)*/);
 
     private int nPizzas = 0;
     private int nServedCustomers = 0;
@@ -73,48 +75,48 @@ class PizzaSem {
 
     public void preparePizzas(int id) {
         try {semA.acquire(); } catch (Exception e) {}
-        while (_______/*(9)*/ >= MAX_NUM_PIZZAS) {
-            try { ____________/*(10)*/; } catch (Exception e) {}
-            try { ____________/*(11)*/; } catch (Exception e) {}
-            try { ____________/*(12)*/; } catch (Exception e) {}
+        while (nPizzas/*(9)*/ >= MAX_NUM_PIZZAS) {
+            try { semA.release()/*(10)*/; } catch (Exception e) {}
+            try { semB.acquire()/*(11)*/; } catch (Exception e) {}
+            try { semA.acquire()/*(12)*/; } catch (Exception e) {}
         }
 
         nPizzas = nPizzas + 2;
         if ((nPizzas) / NUM_CLIENTS - (nPizzas - 2) / NUM_CLIENTS > 0)
-            _________________/*(13)*/++;
+            nTablesToBeCharged/*(13)*/++;
 
         System.out.println("Oven " + id + ": " + toString());
         semC.release();
-        _______________/*(14)*/;
+        semD.release()/*(14)*/;
         semA.release();
     }
 
     public void chargeBill() {
         try { semA.acquire(); } catch (Exception e) {}
-        while (___________/*(15)*/ < 1) {
-            try { _____________/*(16)*/; } catch (Exception e) {}
+        while (nTablesToBeCharged/*(15)*/ < 1) {
+            try { semA.release()/*(16)*/; } catch (Exception e) {}
             try { semD.acquire(); } catch (Exception e) {}
-            try { _____________/*(17)*/; } catch (Exception e) {}
+            try { semA.acquire()/*(17)*/; } catch (Exception e) {}
         }
 
         nChargedTables = nChargedTables + 1;
-        ______________/*(18)*/--;
+        nTablesToBeCharged/*(18)*/--;
         System.out.println("Cashier: " + toString() + " total cashed tables " + nChargedTables);
-        _______________/*(19)*/;
+        semB.release()/*(19)*/;
         semA.release();
     }
 
     public void servePizzas() {
         try { semA.acquire(); } catch (Exception e) {}
-        while ((_________/*(20)*/ < NUM_CLIENTS)) {
-            try { ____________/*(21)*/; } catch (Exception e) {}
-            try { _____________/*(22)*/; } catch (Exception e) {}
-            try { _____________/*(23)*/; } catch (Exception e) {}
+        while ((nPizzas/*(20)*/ < NUM_CLIENTS)) {
+            try { semA.release()/*(21)*/; } catch (Exception e) {}
+            try { semC.acquire()/*(22)*/; } catch (Exception e) {}
+            try { semA.acquire()/*(23)*/; } catch (Exception e) {}
         }
-        ___________/*(24)*/ -= ____________/*(25)*/;
-        ___________/*(26)*/ += ____________/*(27)*/;
+        nPizzas/*(24)*/ -= NUM_CLIENTS/*(25)*/;
+        nServedCustomers/*(26)*/ += NUM_CLIENTS/*(27)*/;
         System.out.println("Waiter: " + toString() + " total served customers " + nServedCustomers);
-        ________________/*(28)*/;
+        semB.release()/*(28)*/;
         semA.release();
     }
 }
