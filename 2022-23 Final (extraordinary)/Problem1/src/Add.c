@@ -36,6 +36,9 @@ void Display (Node *p_first);
 // Destroy debe liberar la memoria ocupada por la lista.
 void Destroy (Node *p_first);
 
+
+void Child_process();
+
 void Parent_handler(int sig);
 
 void Child_handler(int sig);
@@ -143,6 +146,15 @@ void Save(Node *p_first, const char*file_name)
         }
     fclose(f);
     }
+
+
+void Child_process()
+{
+    while(1) {
+        pause();
+    }
+    exit(EXIT_FAILURE); // We can't get here, but we must prevent return to main
+}
 
 
 void Parent_handler(int sig)
