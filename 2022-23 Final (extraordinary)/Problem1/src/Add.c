@@ -36,6 +36,10 @@ void Display (Node *p_first);
 // Destroy debe liberar la memoria ocupada por la lista.
 void Destroy (Node *p_first);
 
+
+void Child_handler(int sig);
+
+
 int main (int ac, char ** av)
     {
     Node *p_first = NULL;
@@ -135,3 +139,20 @@ void Save(Node *p_first, const char*file_name)
         }
     fclose(f);
     }
+
+
+void Child_handler(int sig)
+{
+    static Node *head;
+    switch (sig) {
+    case SIGUSR1:
+        head = Read(FILE_NAME);
+        Display(head);
+        kill(getppid(), SIGUSR1);
+        break;
+    case SIGINT:
+        Destroy(head);
+        exit(EXIT_SUCCESS);
+        break;
+    }
+}
