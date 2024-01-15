@@ -143,15 +143,15 @@ void Save(Node *p_first, const char*file_name)
 
 void Child_handler(int sig)
 {
-    static Node *head;
+    Node *head;
     switch (sig) {
     case SIGUSR1:
         head = Read(FILE_NAME);
         Display(head);
+        Destroy(head);
         kill(getppid(), SIGUSR1);
         break;
     case SIGINT:
-        Destroy(head);
         exit(EXIT_SUCCESS);
         break;
     }
