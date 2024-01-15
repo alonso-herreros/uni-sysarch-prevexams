@@ -60,7 +60,7 @@ class PizzaSem {
     }
 
     private Semaphore semA = new Semaphore(1/*(5)*/);
-    private Semaphore semB = new Semaphore(1/*(6)*/);
+    private Semaphore semB = new Semaphore(0/*(6)*/);
     private Semaphore semC = new Semaphore(0/*(7)*/);
     private Semaphore semD = new Semaphore(0/*(8)*/);
 
