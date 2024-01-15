@@ -69,6 +69,17 @@ Node* New_node(const char *ip, const char *mac)
     return(p_node) ;
     }
 
+Node* Add(Node *p_first, Node *p_node)
+{
+    if (p_first == NULL)  return p_node;
+
+    Node *curr;
+    for (curr = p_first; curr->next != NULL; curr = curr->next);
+    curr->next = p_node;
+
+    return p_first;
+}
+
 
 void Display(Node *p_first)
     {
