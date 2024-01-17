@@ -642,7 +642,7 @@ do {
 } while (true);
 ```
 
-### PROBLEM 3
+## PROBLEM 3
 *(2 points, 70 minutes)*
 
 In a library, we have writers who are responsible for writing books, and readers who are responsible for
