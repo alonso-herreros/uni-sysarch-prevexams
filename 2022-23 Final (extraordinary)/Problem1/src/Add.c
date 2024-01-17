@@ -54,7 +54,7 @@ int main (int ac, char ** av)
     pid_t cpid;
     if((cpid=fork()) < 0)  exit(EXIT_FAILURE);
     if (cpid == 0) Child_process();
-    Parent_process(cpid, av[0], av[1]);
+    Parent_process(cpid, av[1], av[2]);
 }
 
 void Verify_args(int ac, char ** av)
@@ -111,22 +111,20 @@ void Destroy (Node *p_first)
 
 Node *Read(const char *file_name)
 {
+    if (access(file_name, R_OK) < 0)  return NULL;
     FILE *f = fopen(file_name, "rb");
+    if (feof(f))  return NULL;
 
-    Node *head = (Node *) calloc(sizeof(Node), 1);
-    Node *curr = head;
-    Node *last = NULL;
-    for (int nread; !feof(f); curr = (Node *) calloc(sizeof(Node), 1)) {
-        nread = fread(curr, sizeof(Node), 1, f);
-        if (nread != sizeof(Node)) {
+    Node *head = NULL;
+    for (Node *curr; !feof(f); ) {
+        curr = (Node *) calloc(1, sizeof(Node));
+        if (fread(curr, sizeof(Node), 1, f) != 1) {
             free(curr);
-            curr = NULL;
             continue;
         }
-        if (last != NULL)  last->next = curr;
-        last = curr;
+        curr->next = NULL;
+        head = Add(head, curr);
     }
-    if (curr != NULL && curr->ip[0] != 0)  free(curr);
     fclose(f);
     return head;
 }
@@ -144,11 +142,12 @@ void Save(Node *p_first, const char*file_name)
 
 void Parent_process(pid_t cpid, const char *ip, const char *mac)
 {
+    signal(SIGUSR1, Parent_handler);
 
     sleep(1);
 
-    kill(cpid, SIGUSR1);
     waiting_for_print = 1;
+    kill(cpid, SIGUSR1);
     while (waiting_for_print)  pause();
 
     Node *p_first = Read(FILE_NAME);
@@ -156,8 +155,8 @@ void Parent_process(pid_t cpid, const char *ip, const char *mac)
     Save(p_first, FILE_NAME);
     Destroy(p_first);
 
-    kill(cpid, SIGUSR1);
     waiting_for_print = 1;
+    kill(cpid, SIGUSR1);
     while (waiting_for_print)  pause();
 
     kill(cpid, SIGINT);
@@ -166,6 +165,8 @@ void Parent_process(pid_t cpid, const char *ip, const char *mac)
 
 void Child_process()
 {
+    signal(SIGUSR1, Child_handler);
+    signal(SIGINT, Child_handler);
     while(1) {
         pause();
     }
