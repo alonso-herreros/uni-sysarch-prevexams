@@ -1,5 +1,6 @@
 # **Systems Architecture - Previous Years**
 **`[GITT 2-1]` `[SysArch]` `(2023-2024)`**
+
 ### _Previous year's exercises and exam samples_
 
 ---
@@ -10,6 +11,7 @@
 
 ## Compilation & execution
 To compile and execute an exercise's code, you may use these commands inside the exercise's folder (not from the src  folder):
+
 ```bash
 gcc ./src/*.c -o ./bin/main -g -Wall 
 chmod o+rx ./bin/main
@@ -29,7 +31,7 @@ chmod o+rx ./bin/main
 ### Finals
 | Sample || Status |
 | --- | --- | :---: |
-| 2022-23 | Ordinary      | Not loaded |
+| 2022-23 | Ordinary      | Done |
 |         | Extraordinary | Not loaded |
 | 2021-22 | Ordinary      | Not loaded |
 |         | Extraordinary | Not loaded |
